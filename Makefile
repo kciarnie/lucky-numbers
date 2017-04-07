@@ -36,4 +36,4 @@ setup:
 	pip3 install virtualenv
 
 test:
-	pytest
+	pytest tests/

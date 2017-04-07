@@ -17,4 +17,5 @@ class TestLuckyNumber(TestCase):
         :return:
         """
         result = runner.invoke(main, ["569815571556", "493853289475", "1234567", "472844278465445"])
+        print(result.output)
         assert result.exit_code == 0, "%s" % result.exception
