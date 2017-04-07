@@ -76,6 +76,10 @@ def display(initial_value, result):
         print(output)
 
 
+def has_duplicates(digits):
+    return len(digits) != len(set(digits))
+
+
 def parse(digits):
     """
     If we are over 7 digits and under 15 digits, we will have atleast 1 digit that requires that there be a 
@@ -133,7 +137,10 @@ def parse(digits):
 
                     # Split the rest of the list and put it into the result
                     end = list(digits[i + 2:])
-                    result += end
+
+                    # Only add it if the values don't have any duplicates in it
+                    if not has_duplicates(end):
+                        result += end
                     break
 
                 elif is_double_digit:
@@ -143,7 +150,6 @@ def parse(digits):
                 # Check to see if we can add just the left digit
                 value = value[0]
                 if value not in result:
-
                     # Add this value
                     result.append(value)
 
