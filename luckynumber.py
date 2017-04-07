@@ -27,33 +27,36 @@ def is_valid(number):
         # If so, we convert it to an integer and check if it is between 1 and 59
         number = int(number)
 
+    # Is in the range of 1 to 59
     return LOWEST_NUMBER <= number <= HIGHEST_NUMBER
 
 
-def left(i, valid_digits, entries, previous_entry):
-    if i + 1 < len(valid_digits) and valid_digits[i] and not valid_digits[i + 1]:
+def get_value(position, valid_digits, entries, previous_entry):
+    """
+    A valid number to take is if it is a number between 1 and 59 going left to right
+    :param position: the current position
+    :param valid_digits: 
+    :param entries: 
+    :param previous_entry: 
+    :return: 
+    """
+    value = None
 
-        # Pick entry 1 if it is not the same number as the previous value coming in
-        current_entry = entries[i]
-        if not current_entry == previous_entry:
-            return current_entry
+    # Just a nice variable for better understanding in this example
+    current_entry = entries[position]
 
-    return None
+    if valid_digits[position]:
+        # If the first digit is a valid digit, we grab it
+        value = entries[position]
+    elif not valid_digits[position] and valid_digits[position + 1]:
+        # If the first double digit is not valid and the next double digit by traversing one digit is valid, we grab
+        value = current_entry[0]
 
-
-def middle(i, valid_digits, entries, previous_entry):
-    if not valid_digits[i] and valid_digits[i + 1]:
-        next_entry = entries[i + 1]
-        if not next_entry == previous_entry:
-            return next_entry
-    return None
-
-
-def right(i, valid_digits, entry, previous_entry):
-    if not valid_digits[i] and not valid_digits[i + 1]:
-        right_digit = entry[i][1:]
-        if not previous_entry == right_digit:
-            return right_digit
+    # If no value is grabbed or if we have a double, then we don't return a value
+    if not value or value == previous_entry:
+        return None
+    else:
+        return value
 
 
 def display(initial_value, result):
@@ -71,59 +74,69 @@ def display(initial_value, result):
         print(output)
 
 
-def double_parse(value):
+def parse(digits):
+    """
+    If we are over 7 digits and under 15 digits, we will have atleast 1 digit that requires that there be a 
+    double digits
+    :param digits: 
+    :return: 
+    """
+    num_of_doubles = (len(digits) - UNIQUE_NUMBER)
+
+    # If there are only 7 digits, then we just return a list of all the digits
+    if num_of_doubles == 0:
+        return list(digits)
+
     # Get all the potential double digits
-    doubles = [value[i:i + 2] for i in range(0, len(value))]
+    doubles = [digits[i:i + 2] for i in range(0, len(digits))]
 
     # Validate if they are between 1 and 59
     valid_digits = [is_valid(i) for i in doubles]
 
-    result = {}
+    result = []
     previous_entry = None
+
+    # Used as a skipper so because I use the enumerator and maybe there is a better way cause i would like
+    # to do i+1 where skip = True
+    skip = False
+
     for i, first_entry in enumerate(doubles):
-        first = left(i, valid_digits, doubles, previous_entry)
-        second = middle(i, valid_digits, doubles, previous_entry)
-        third = right(i, valid_digits, doubles, previous_entry)
-        if first:
-            result[i] = first
-        elif second:
-            result[i] = second
-        elif third:
-            result[i] = third
+        # Skip if this is set, this is like making i+1 so that it would enumerate after the next digit
+        if skip:
+            skip = False
+            continue
 
-        if i in result:
-            previous_entry = result[i]
+        # Get the valid number
+        value = get_value(i, valid_digits, doubles, previous_entry)
 
-    # Convert to a list
-    return [v for v in result.values()]
+        # Only add the value if it is not in the result list
+        if value and value not in result:
 
+            # Add it to the list and store the value as a previous entry for the next for loop iteration
+            result.append(value)
+            previous_entry = value
 
-def single_parse(string):
-    """
-    Converts the string into a list of all the digits. This is a unique case where there are only
-    7 digits
-    :param string: the input string 
-    :return: a list of all the characters
-    """
-    return list(string)
+            # Check to see if the result is a double-digit
+            is_double_digit = len(value) == 2
 
+            # If the value is bigger than 10, it is a double digit and we only have a certain amount of
+            # double digits, so once we get to zero, we just split the rest of the string into the result
+            if is_double_digit:
+                num_of_doubles -= 1
 
-def parse(value):
-    """
-    Parses through the string and gets a result of the potential string back
-    :param value: 
-    :return: 
-    """
+            # Check to see if a value is in a list
+            if num_of_doubles == 0:
 
-    if len(value) == UNIQUE_NUMBER:
-        # If we are in this case, it's the unique situation that we only have 7 numbers in the string
-        result = single_parse(value)
-    else:
-        # Every other situation and we are here
-        result = double_parse(value)
+                # Split the rest of the list and put it into the result
+                end = list(digits[i + 2:])
+                result += end
+                break
 
-    # Calls the display function
-    display(value, result)
+            elif is_double_digit:
+                # Since it's a double-digit, we want to skip two numbers for iterating through the loop
+                skip = True
+
+    return result
 
 
 @click.command(short_help="Welcome to Uncle Morty's Lucky Numbers", context_settings=CONTEXT_SETTINGS)
@@ -145,7 +158,7 @@ def main(numbers):
 
     For example, given the following strings:
 
-    [ "569815571556", “4938532894754”, “1234567”, “472844278465445”]
+    [ "569815571556", “4938532894754”, “12345617”, “472844278465445”]
 
     Your function should return:
 
@@ -157,8 +170,13 @@ def main(numbers):
     for digits in numbers:
         if digits:
             length = len(digits)
+
+            # Check to make sure we are between 7 and 14 digits. If not, we don't continue
             if FEWEST_DIGITS <= length <= MOST_DIGITS:
-                parse(digits)
+                lucky_numbers = parse(digits)
+
+                # Calls the display function
+                display(digits, lucky_numbers)
 
 
 if __name__ == '__main__':
