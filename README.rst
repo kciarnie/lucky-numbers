@@ -10,8 +10,29 @@ After you can just run:
 make local
 ```
 
+Since I am saving this to the python ```dev``` instance. Run
+
+```
+source dev/bin/activate/
+```
+
 From there, you can run `luckynum --help` to see the options
 
+If you want to not see this CLI command anymore, type
+```
+deactivate
+```
+
+To run the pyTests: run
+```
+pytest
+```
+
+or
+
+```
+make test
+```
 
 QUESTION
 
