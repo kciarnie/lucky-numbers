@@ -22,45 +22,56 @@ def is_valid(number):
     :param number: the input number to check
     :return: if the value is between 1 and 59
     """
+    # Check to see if the number is a str
     if isinstance(number, str):
+        # If so, we convert it to an integer and check if it is between 1 and 59
         number = int(number)
+
     return LOWEST_NUMBER <= number <= HIGHEST_NUMBER
 
 
-def left(i, valid_double_digits, entry, previous):
-    if i + 1 < len(valid_double_digits) and valid_double_digits[i] and not valid_double_digits[i + 1]:
+def left(i, valid_digits, entries, previous_entry):
+    if i + 1 < len(valid_digits) and valid_digits[i] and not valid_digits[i + 1]:
 
         # Pick entry 1 if it is not the same number as the previous value coming in
-        if not entry[i] == previous:
-            return entry[i]
+        current_entry = entries[i]
+        if not current_entry == previous_entry:
+            return current_entry
 
     return None
 
 
-def middle(i, valid_double_digits, entry, previous):
-    if not valid_double_digits[i] and valid_double_digits[i + 1]:
-        if not entry[i + 1] == previous:
-            return entry[i + 1]
+def middle(i, valid_digits, entries, previous_entry):
+    if not valid_digits[i] and valid_digits[i + 1]:
+        next_entry = entries[i + 1]
+        if not next_entry == previous_entry:
+            return next_entry
     return None
 
 
-def right(i, valid_double_digits, entry, previous):
-    if not valid_double_digits[i] and not valid_double_digits[i + 1]:
+def right(i, valid_digits, entry, previous_entry):
+    if not valid_digits[i] and not valid_digits[i + 1]:
         right_digit = entry[i][1:]
-        if not previous == right_digit:
+        if not previous_entry == right_digit:
             return right_digit
 
 
-def display(original, result):
+def display(initial_value, result):
+    """
+    This is the display function
+    ex. 4938532894754 -> 49 38 53 28 9 47 54
+    :param initial_value: the initial string of digits, ie 1234567 or 4938532894754
+    :param result: The resulting list of values that should correspond to what should be outputted
+    :return: prints the output if the values are the proper 7 unique digits between 1 and 59
+    """
     if len(result) == UNIQUE_NUMBER:
-        output = original + " -> "
+        output = initial_value + " -> "
         for value in result:
             output += " %s" % value
         print(output)
 
 
 def double_parse(value):
-
     # Get all the potential double digits
     doubles = [value[i:i + 2] for i in range(0, len(value))]
 
@@ -68,11 +79,11 @@ def double_parse(value):
     valid_digits = [is_valid(i) for i in doubles]
 
     result = {}
-    previous = None
+    previous_entry = None
     for i, first_entry in enumerate(doubles):
-        first = left(i, valid_digits, doubles, previous)
-        second = middle(i, valid_digits, doubles, previous)
-        third = right(i, valid_digits, doubles, previous)
+        first = left(i, valid_digits, doubles, previous_entry)
+        second = middle(i, valid_digits, doubles, previous_entry)
+        third = right(i, valid_digits, doubles, previous_entry)
         if first:
             result[i] = first
         elif second:
@@ -81,19 +92,20 @@ def double_parse(value):
             result[i] = third
 
         if i in result:
-            previous = result[i]
+            previous_entry = result[i]
 
     # Convert to a list
     return [v for v in result.values()]
 
 
-def single_parse(value):
+def single_parse(string):
     """
-    Converts the string into a list of all the digits
-    :param value: the input string 
+    Converts the string into a list of all the digits. This is a unique case where there are only
+    7 digits
+    :param string: the input string 
     :return: a list of all the characters
     """
-    return list(value)
+    return list(string)
 
 
 def parse(value):
@@ -115,7 +127,8 @@ def parse(value):
 
 
 @click.command(short_help="Welcome to Uncle Morty's Lucky Numbers", context_settings=CONTEXT_SETTINGS)
-def main():
+@click.argument('numbers', nargs=-1, required=1)
+def main(numbers):
     """
     Winning Ticket!
 
@@ -140,8 +153,8 @@ def main():
     1234567 -> 1 2 3 4 5 6 7
     """
 
-    lists = ["569815571556", "4938532894754", "1234567", "472844278465445"]
-    for digits in lists:
+    # nargs = -1 is used in click to allow multiple arguments and it turns it into a list
+    for digits in numbers:
         if digits:
             length = len(digits)
             if FEWEST_DIGITS <= length <= MOST_DIGITS:
