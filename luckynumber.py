@@ -52,8 +52,10 @@ def get_value(position, valid_digits, entries, previous_entry):
         # If the first double digit is not valid and the next double digit by traversing one digit is valid, we grab
         value = current_entry[0]
 
-    # If no value is grabbed or if we have a double, then we don't return a value
+    # if value == current_entry:
+    #     return value[0]
     if not value or value == previous_entry:
+        # If no value is grabbed or if we have a double, then we don't return a value
         return None
     else:
         return value
@@ -110,31 +112,40 @@ def parse(digits):
         value = get_value(i, valid_digits, doubles, previous_entry)
 
         # Only add the value if it is not in the result list
-        if value and value not in result:
+        if value:
+            # If it is not a duplicate, add it. If not, just add the left digit
+            if value not in result:
 
-            # Add it to the list and store the value as a previous entry for the next for loop iteration
-            result.append(value)
-            previous_entry = value
+                # Add it to the list and store the value as a previous entry for the next for loop iteration
+                result.append(value)
+                previous_entry = value
 
-            # Check to see if the result is a double-digit
-            is_double_digit = len(value) == 2
+                # Check to see if the result is a double-digit
+                is_double_digit = len(value) == 2
 
-            # If the value is bigger than 10, it is a double digit and we only have a certain amount of
-            # double digits, so once we get to zero, we just split the rest of the string into the result
-            if is_double_digit:
-                num_of_doubles -= 1
+                # If the value is bigger than 10, it is a double digit and we only have a certain amount of
+                # double digits, so once we get to zero, we just split the rest of the string into the result
+                if is_double_digit:
+                    num_of_doubles -= 1
 
-            # Check to see if a value is in a list
-            if num_of_doubles == 0:
+                # Check to see if a value is in a list
+                if num_of_doubles == 0:
 
-                # Split the rest of the list and put it into the result
-                end = list(digits[i + 2:])
-                result += end
-                break
+                    # Split the rest of the list and put it into the result
+                    end = list(digits[i + 2:])
+                    result += end
+                    break
 
-            elif is_double_digit:
-                # Since it's a double-digit, we want to skip two numbers for iterating through the loop
-                skip = True
+                elif is_double_digit:
+                    # Since it's a double-digit, we want to skip two numbers for iterating through the loop
+                    skip = True
+            else:
+                # Check to see if we can add just the left digit
+                value = value[0]
+                if value not in result:
+
+                    # Add this value
+                    result.append(value)
 
     return result
 

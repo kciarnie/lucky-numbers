@@ -7,23 +7,6 @@ from setuptools.command.test import test as TestCommand
 requires = ['bumpversion', 'click']
 tests_require = ['pytest', 'pytest-cache', 'pytest-cov', 'configparser']
 
-
-class PyTest(TestCommand):
-    def __init__(self):
-        self.test_suite = True
-        self.test_args = []
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        self.test_suite = True
-        self.test_args = []
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.test_args)
-        sys.exit(errno)
-
-
 setup(
     name="lucky numbers",
     author="Kevin Ciarniello",
@@ -49,5 +32,4 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: Implementation :: CPython'],
     extras_require={'test': tests_require},
-    cmdclass={'test': PyTest}
 )
