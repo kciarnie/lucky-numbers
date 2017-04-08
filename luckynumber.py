@@ -48,8 +48,8 @@ def get_value(position, valid_digits, entries, previous_entry):
     if valid_digits[position]:
         # If the first digit is a valid digit, we grab it
         value = entries[position]
-    elif not valid_digits[position] and valid_digits[position + 1]:
-        # If the first double digit is not valid and the next double digit by traversing one digit is valid, we grab
+    elif not valid_digits[position]:
+        # If the first double digit is not valid, then we grab the next first digit
         value = current_entry[0]
 
     # if value == current_entry:
@@ -183,6 +183,7 @@ def main(numbers):
     1234567 -> 1 2 3 4 5 6 7
     """
 
+    numbers = ["472844278465445"]
     # nargs = -1 is used in click to allow multiple arguments and it turns it into a list
     for digits in numbers:
         if digits:
